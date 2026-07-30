@@ -1,11 +1,19 @@
+import os
+
 import torch
 import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 import pygad
-from config import CURRENT_ARCH, CURRENT_IMAGES, CURRENT_N_PIXELS, CURRENT_TARGET_CLASS
 from training.data_loader import get_data_loaders, get_classes
 from training.model import Net
+import os
+import config
+
+CURRENT_ARCH = os.getenv("CURRENT_ARCH", getattr(config, "CURRENT_ARCH", "resnet50"))
+CURRENT_N_PIXELS = int(os.getenv("CURRENT_N_PIXELS", getattr(config, "CURRENT_N_PIXELS", 10)))
+CURRENT_IMAGES = int(os.getenv("CURRENT_IMAGES", getattr(config, "CURRENT_IMAGES", 50)))
+CURRENT_TARGET_CLASS = int(os.getenv("CURRENT_TARGET_CLASS", getattr(config, "CURRENT_TARGET_CLASS", 1)))
 
 import time
 
@@ -84,13 +92,13 @@ def run_attack_on_image(img, target_class, n_pixels):
 
 def main():
     global device, model, IMAGENET_MEAN, IMAGENET_STD
-
+    os.makedirs("GE", exist_ok=True)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Using device:", device)
 
     NUM_CLASSES = 100
     ARCH = CURRENT_ARCH
-    CHECKPOINT_PATH = f"{ARCH}.pt"
+    CHECKPOINT_PATH = f"/kaggle/input/datasets/oliwianieradzik/models/{ARCH}.pt"
 
     model = Net(num_classes=NUM_CLASSES, arch=ARCH)
     checkpoint = torch.load(CHECKPOINT_PATH, map_location=device)
@@ -164,7 +172,7 @@ def main():
     print(f"Average target confidence: {avg_target_conf:.4f}")
     print(f"Average attack time per image: {avg_time:.2f}s")
 
-    model_name = ARCH + "_" + CHECKPOINT_PATH.split('.')[0]
+    model_name = ARCH
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     filename = f"GE/attack_results_{model_name}_{N_PIXELS}_GA.txt"
 
