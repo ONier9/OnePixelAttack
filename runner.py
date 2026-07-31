@@ -3,9 +3,9 @@ import subprocess
 import time
 from itertools import product
 from concurrent.futures import ProcessPoolExecutor
-
-architectures = ["resnet50", "resnet18", "efficientnet_b0", "mobilenet_v3_small", "densenet121"]
-pixels = [1, 10]
+#, "efficientnet_b0", "mobilenet_v3_small", "densenet121"
+architectures = ["resnet50", "resnet18"]
+pixels = [5,25]
 scripts = ["differential_evolution_test.py", "genetic_test.py", "cmaes_test.py"]
 images = 50
 target_class = 1
