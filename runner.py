@@ -23,7 +23,7 @@ def worker(task_and_gpu):
     script = task["script"]
     
     folder, suffix = SCRIPT_INFO[script]
-    expected_file = f"{folder}/attack_results_{arch}_{arch}_{pix}_{suffix}.txt"
+    expected_file = f"{folder}/attack_results_{arch}_{pix}_{suffix}.txt"
 
     if os.path.exists(expected_file):
         print(f"[GPU {gpu_id}] SKIPPING: {script} | ARCH={arch} | PIX={pix} (Already exists)")
