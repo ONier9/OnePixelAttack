@@ -69,10 +69,10 @@ def run_attack_on_image(img, target_class, n_pixels):
             (0, 1)       # B
         ])
     def batch_fitness_func(ga_instance, solutions, solutions_indices):
-        solutions = np.asarray(solutions)
+        solutions = np.asarray(solutions, dtype=np.float64)
         N = solutions.shape[0]
         perturbed = img.repeat(N, 1, 1, 1)
-
+    
         params_t = torch.tensor(solutions, device=device, dtype=torch.float32)
         xs = torch.round(params_t[:, 0::5]).long().clamp(0, W - 1)
         ys = torch.round(params_t[:, 1::5]).long().clamp(0, H - 1)
