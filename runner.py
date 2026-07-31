@@ -5,7 +5,7 @@ from itertools import product
 from concurrent.futures import ProcessPoolExecutor
 from training.data_loader import get_data_loaders
 architectures = ["resnet50", "resnet18","efficientnet_b0", "mobilenet_v3_small", "densenet121"]
-pixels = [1,10]
+pixels = [1]
 scripts = ["differential_evolution_test.py", "genetic_test.py", "cmaes_test.py"]
 images = 50
 target_class = 1
