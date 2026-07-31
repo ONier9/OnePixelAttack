@@ -1,4 +1,3 @@
-
 import torch
 import torch.nn.functional as F
 import numpy as np
@@ -75,12 +74,36 @@ def run_attack_on_image(img, target_class, n_pixels):
     upper_bounds = [W - 1, H - 1, 1, 1, 1] * n_pixels
     bounds = [lower_bounds, upper_bounds]
 
-    def cma_objective(params):
-        params_rounded = params.copy()
-        for i in range(n_pixels):
-            params_rounded[i*5]     = round(params[i*5])
-            params_rounded[i*5 + 1] = round(params[i*5 + 1])
-        return targeted_objective(params_rounded, img, target_class, n_pixels)
+    def batch_objective(solutions):
+        solutions = np.asarray(solutions)
+        rounded = solutions.copy()
+        rounded[:, 0::5] = np.round(rounded[:, 0::5])
+        rounded[:, 1::5] = np.round(rounded[:, 1::5])
+
+        N = rounded.shape[0]
+        perturbed = img.repeat(N, 1, 1, 1)
+
+        params_t = torch.tensor(rounded, device=device, dtype=torch.float32)
+        xs = params_t[:, 0::5].long().clamp(0, W - 1)
+        ys = params_t[:, 1::5].long().clamp(0, H - 1)
+        rs = params_t[:, 2::5].clamp(0, 1)
+        gs = params_t[:, 3::5].clamp(0, 1)
+        bs = params_t[:, 4::5].clamp(0, 1)
+
+        batch_indices = torch.arange(N, device=device).repeat_interleave(n_pixels)
+        y_flat = ys.flatten()
+        x_flat = xs.flatten()
+
+        perturbed[batch_indices, 0, y_flat, x_flat] = rs.flatten()
+        perturbed[batch_indices, 1, y_flat, x_flat] = gs.flatten()
+        perturbed[batch_indices, 2, y_flat, x_flat] = bs.flatten()
+
+        with torch.no_grad():
+            logits = model(normalize(perturbed))
+            probs = F.softmax(logits, dim=1)
+            target_probs = probs[:, target_class].cpu().numpy()
+
+        return list(-target_probs) 
 
     sigma = 30.0  
     options = {
@@ -96,7 +119,10 @@ def run_attack_on_image(img, target_class, n_pixels):
     }
 
     es = cma.CMAEvolutionStrategy(initial_solution, sigma, options)
-    es.optimize(cma_objective)
+    while not es.stop():
+        solutions = es.ask()
+        fitnesses = batch_objective(solutions)
+        es.tell(solutions, fitnesses)
 
     best_solution = es.result.xbest
 
