@@ -68,13 +68,38 @@ def run_attack_on_image(img, target_class, n_pixels):
             (0, 1),      # G
             (0, 1)       # B
         ])
-    def fitness_func(ga_instance, solution, solution_idx):
-        return -targeted_objective(solution, img, target_class, n_pixels)
-    
+    def batch_fitness_func(ga_instance, solutions, solutions_indices):
+        solutions = np.asarray(solutions)
+        N = solutions.shape[0]
+        perturbed = img.repeat(N, 1, 1, 1)
+
+        params_t = torch.tensor(solutions, device=device, dtype=torch.float32)
+        xs = torch.round(params_t[:, 0::5]).long().clamp(0, W - 1)
+        ys = torch.round(params_t[:, 1::5]).long().clamp(0, H - 1)
+        rs = params_t[:, 2::5].clamp(0, 1)
+        gs = params_t[:, 3::5].clamp(0, 1)
+        bs = params_t[:, 4::5].clamp(0, 1)
+
+        batch_indices = torch.arange(N, device=device).repeat_interleave(n_pixels)
+        y_flat = ys.flatten()
+        x_flat = xs.flatten()
+
+        perturbed[batch_indices, 0, y_flat, x_flat] = rs.flatten()
+        perturbed[batch_indices, 1, y_flat, x_flat] = gs.flatten()
+        perturbed[batch_indices, 2, y_flat, x_flat] = bs.flatten()
+
+        with torch.no_grad():
+            logits = model(normalize(perturbed))
+            probs = F.softmax(logits, dim=1)
+            target_probs = probs[:, target_class].cpu().numpy()
+
+        return target_probs  
+        
     ga_instance = pygad.GA(
         num_generations=100,
         num_parents_mating=10, 
-        fitness_func=fitness_func,
+        fitness_func=batch_fitness_func,
+        fitness_batch_size=15,
         sol_per_pop=15,
         num_genes=len(bounds),
         gene_space=[{'low': low, 'high': high, 'step': None if low != high else 0} 
