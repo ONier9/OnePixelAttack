@@ -140,7 +140,7 @@ def main():
     TARGET_CLASS = CURRENT_TARGET_CLASS
     BATCH_SIZE = N_IMAGES       
 
-    _, testloader = get_data_loaders(batch_size=BATCH_SIZE, data_dir='./data')
+    _, testloader = get_data_loaders(batch_size=BATCH_SIZE, data_dir='./data', only_test=True)
     classes = get_classes()
 
     images, labels = next(iter(testloader))
