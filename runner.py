@@ -3,6 +3,7 @@ import subprocess
 import time
 from itertools import product
 from concurrent.futures import ProcessPoolExecutor
+from training.data_loader import get_data_loaders
 #, "efficientnet_b0", "mobilenet_v3_small", "densenet121"
 architectures = ["resnet50", "resnet18"]
 pixels = [5,25]
@@ -50,7 +51,10 @@ if __name__ == "__main__":
     os.makedirs("DE", exist_ok=True)
     os.makedirs("GE", exist_ok=True)
     os.makedirs("CMAES", exist_ok=True)
-
+    
+    print("Pre-downloading CIFAR-100 dataset to avoid process race conditions...")
+    get_data_loaders(batch_size=1, data_dir='./data', only_test=True)
+    
     all_tasks = []
     for arch, pix, script in product(architectures, pixels, scripts):
         all_tasks.append({
