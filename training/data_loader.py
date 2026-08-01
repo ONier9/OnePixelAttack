@@ -21,7 +21,8 @@ def get_data_loaders(batch_size=4, data_dir='./data', only_test=False):
     """
     IMAGENET_MEAN = [0.485, 0.456, 0.406]
     IMAGENET_STD = [0.229, 0.224, 0.225]
-
+    g = torch.Generator()
+    g.manual_seed(42)
     test_transform = v2.Compose([
         v2.ToImage(),
         v2.Resize(128),                       
@@ -33,7 +34,7 @@ def get_data_loaders(batch_size=4, data_dir='./data', only_test=False):
         root=data_dir, train=False, download=True, transform=test_transform
     )
     testloader = torch.utils.data.DataLoader(
-        testset, batch_size=batch_size, shuffle=False, num_workers=1, pin_memory=True, persistent_workers=True 
+        testset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, persistent_workers=True, generator=g
     )
 
     if only_test:
