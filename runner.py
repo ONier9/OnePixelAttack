@@ -4,8 +4,9 @@ import time
 from itertools import product
 from concurrent.futures import ProcessPoolExecutor
 from training.data_loader import get_data_loaders
-#"resnet50", "resnet18","efficientnet_b0", "mobilenet_v3_small", 
-architectures = ["resnet50","densenet121"]
+#"resnet50", "resnet18","efficientnet_b0", "mobilenet_v3_small",
+#,
+architectures = ["densenet121"]
 pixels = [1,10]
 #, "genetic_test.py", "cmaes_test.py"
 scripts = ["differential_evolution_test.py", "genetic_test.py", "cmaes_test.py"]
