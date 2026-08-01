@@ -9,7 +9,7 @@ architectures = ["resnet50","densenet121"]
 pixels = [1,10]
 #, "genetic_test.py", "cmaes_test.py"
 scripts = ["differential_evolution_test.py", "genetic_test.py", "cmaes_test.py"]
-images = 500
+images = 200
 target_class = 1
 
 SCRIPT_INFO = {
