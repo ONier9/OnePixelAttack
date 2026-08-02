@@ -6,10 +6,10 @@ from concurrent.futures import ProcessPoolExecutor
 from training.data_loader import get_data_loaders
 #, ,"densenet121"
 #,"resnet18","efficientnet_b0", "mobilenet_v3_small"
-architectures = ["resnet50"]
-pixels = [1,10]
-#, "genetic_test.py", "cmaes_test.py"
-scripts = ["differential_evolution_test.py", "genetic_test.py", "cmaes_test.py"]
+architectures = ["resnet50","resnet18"]
+pixels = [5,25]
+#"differential_evolution_test.py", "genetic_test.py", "cmaes_test.py"
+scripts = ["cmaes_test.py"]
 images = 200
 target_class = 1
 
